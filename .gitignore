@@ -1,3 +1,6 @@
+# target
+*.so
+
 # npapi sdk
 npapi-sdk/
 
