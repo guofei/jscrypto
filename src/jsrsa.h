@@ -7,7 +7,7 @@ typedef struct Keys *Keys;
 typedef enum { PRIVATE_KEY , PUBLIC_KEY } KeyType;
 
 extern Keys keys_new();
-extern void keys_push(Keys k, RSA *rsa);
+extern int keys_push(Keys k, RSA *rsa);
 extern RSA *keys_get(Keys k, int index);
 extern void keys_free(Keys k);
 
