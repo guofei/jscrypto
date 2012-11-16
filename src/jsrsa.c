@@ -11,7 +11,7 @@
 
 static void print_error(char *msg, unsigned long err);
 static int write_public_key(const char *path, RSA *key);
-static int write_private_key(const char *path, RSA *key);
+static int write_private_key(const char *path, RSA *key, const char *password);
 static char* str_join(const char* a, const char* b);
 
 KEYS keys;
@@ -32,7 +32,7 @@ int pass_cb1(char *buf, int size, int rwflag, void *u)
         return len;
 }
 
-RSA *read_rsa_key_from_file(const char *file, KeyType type)
+RSA *read_rsa_key_from_file(const char *file, KeyType type, const char *password)
 {
         FILE *fp = fopen(file, "r");
         if(fp == NULL){
@@ -45,7 +45,7 @@ RSA *read_rsa_key_from_file(const char *file, KeyType type)
         if(type == PUBLIC_KEY)
                 key = PEM_read_RSAPublicKey(fp, NULL, NULL, NULL);
         else if(type == PRIVATE_KEY)
-                key = PEM_read_RSAPrivateKey(fp, NULL, pass_cb1, "My Private Key");
+                key = PEM_read_RSAPrivateKey(fp, NULL, NULL, (void *)password);
 
         fclose(fp);
 
@@ -62,7 +62,7 @@ void free_rsa_key(RSA *key)
         RSA_free(key);
 }
 
-int generate_rsa_key_to_file(const char *path, int size)
+int generate_rsa_key_to_file(const char *path, int size, const char *password)
 {
         RSA *key = RSA_generate_key(size, 65537, NULL, NULL);
         if(key == NULL){
@@ -73,7 +73,7 @@ int generate_rsa_key_to_file(const char *path, int size)
         if(write_public_key(path, key) < 0)
                 return -1;
 
-        if(write_private_key(path, key) < 0)
+        if(write_private_key(path, key, password) < 0)
                 return -1;
 
         RSA_free(key);
@@ -83,7 +83,7 @@ int generate_rsa_key_to_file(const char *path, int size)
 
 char* public_encrypt(RSA *key, const char *from, int from_len)
 {
-        BIO *plaintext_mem = BIO_new_mem_buf(from, from_len);
+        BIO *plaintext_mem = BIO_new_mem_buf((void *)from, from_len);
 
         BIO *ciphertext_mem = BIO_new(BIO_s_mem());
         BIO *bio_base64 = BIO_new(BIO_f_base64());
@@ -136,7 +136,7 @@ char* private_decrypt(RSA *key, const char *from, int from_len)
 {
         BIO *bio_base64 = BIO_new(BIO_f_base64());
         BIO_set_flags(bio_base64, BIO_FLAGS_BASE64_NO_NL);
-        BIO *mem_buf = BIO_new_mem_buf(from, from_len);
+        BIO *mem_buf = BIO_new_mem_buf((void *)from, from_len);
         mem_buf = BIO_push(bio_base64, mem_buf);
 
         BIO *plaintext_mem = BIO_new(BIO_s_mem());
@@ -240,7 +240,7 @@ int pass_cb2(char *buf, int size, int rwflag, void *u)
         return len;
 }
 
-static int write_private_key(const char *path, RSA *key)
+static int write_private_key(const char *path, RSA *key, const char *password)
 {
         char *seckey_name = str_join(path, "/private.pem");
         FILE *seckey = fopen(seckey_name, "w");
@@ -248,7 +248,7 @@ static int write_private_key(const char *path, RSA *key)
                 perror(seckey_name);
                 return -1;
         }
-        if(PEM_write_RSAPrivateKey(seckey, key, EVP_des_ede3_cbc(), (unsigned char *)"12345678", 8, NULL, NULL) != 1){
+        if(PEM_write_RSAPrivateKey(seckey, key, EVP_des_ede3_cbc(), (unsigned char *)password, strlen(password), NULL, NULL) != 1){
                 print_error("write rsa private key err", ERR_get_error());
                 return -1;
         }
