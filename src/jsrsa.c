@@ -10,8 +10,8 @@
 #include "jsrsa.h"
 
 static void print_error(char *msg, unsigned long err);
-static int write_public_key(const char *path, const RSA *key);
-static int write_private_key(const char *path, const RSA *key);
+static int write_public_key(const char *path, RSA *key);
+static int write_private_key(const char *path, RSA *key);
 static char* str_join(const char* a, const char* b);
 
 KEYS keys;
@@ -21,7 +21,7 @@ int pass_cb1(char *buf, int size, int rwflag, void *u)
         int len;
         char *tmp;
         /* We'd probably do something else if 'rwflag' is 1 */
-        printf("Enter pass phrase for \"%s\"\n", u);
+        printf("Enter pass phrase for \"%s\"\n", (char *)u);
         /* get pass phrase, length 'len' into 'tmp' */
         tmp = "12345678";
         len = strlen(tmp);
@@ -41,7 +41,7 @@ RSA *read_rsa_key_from_file(const char *file, KeyType type)
         }
         OpenSSL_add_all_algorithms();
         RSA *key;
-        RSA *key2;
+
         if(type == PUBLIC_KEY)
                 key = PEM_read_RSAPublicKey(fp, NULL, NULL, NULL);
         else if(type == PRIVATE_KEY)
@@ -81,7 +81,7 @@ int generate_rsa_key_to_file(const char *path, int size)
         return 0;
 }
 
-char* public_encrypt(const RSA *key, const char *from, int from_len)
+char* public_encrypt(RSA *key, const char *from, int from_len)
 {
         BIO *plaintext_mem = BIO_new_mem_buf(from, from_len);
 
@@ -102,13 +102,16 @@ char* public_encrypt(const RSA *key, const char *from, int from_len)
                 memset(outbuf, 0, rsa_size);
 
                 int outlen;
-                if((outlen = RSA_public_encrypt(inlen, inbuf, outbuf, key, RSA_PKCS1_PADDING)) == -1){
+                if((outlen = RSA_public_encrypt(inlen, (void *)inbuf, (void *)outbuf, key, RSA_PKCS1_PADDING)) == -1){
                         print_error("failed to RSA_public_encrypt", ERR_get_error());
                         exit(-1);
                 }
 
                 int len = BIO_write(bio_chain, outbuf, outlen);
-                int abc = 1;
+		if(len < outlen){
+			print_error("failed to BIO_write", ERR_get_error());
+                        exit(-1);
+		}
         }
         BIO_flush(bio_chain);
         free(inbuf);
@@ -129,7 +132,7 @@ char* public_encrypt(const RSA *key, const char *from, int from_len)
         return ciphertext;
 }
 
-char* private_decrypt(const RSA *key, const char *from, int from_len)
+char* private_decrypt(RSA *key, const char *from, int from_len)
 {
         BIO *bio_base64 = BIO_new(BIO_f_base64());
         BIO_set_flags(bio_base64, BIO_FLAGS_BASE64_NO_NL);
@@ -151,7 +154,7 @@ char* private_decrypt(const RSA *key, const char *from, int from_len)
                 memset(outbuf, 0, rsa_size);
 
                 int outlen;
-                if((outlen = RSA_private_decrypt(inlen, inbuf, outbuf, key, RSA_PKCS1_PADDING)) == -1){
+                if((outlen = RSA_private_decrypt(inlen, (void *)inbuf, (void *)outbuf, key, RSA_PKCS1_PADDING)) == -1){
                         print_error("failed to RSA_private_decrypt", ERR_get_error());
                         exit(-1);
                 }
@@ -202,7 +205,7 @@ static char* str_join(const char* a, const char* b)
         return p;
 }
 
-static int write_public_key(const char *path, const RSA *key)
+static int write_public_key(const char *path, RSA *key)
 {
         char *pubkey_name = str_join(path, "/public.pem");
         FILE *pubkey = fopen(pubkey_name, "w");
@@ -225,7 +228,7 @@ int pass_cb2(char *buf, int size, int rwflag, void *u)
         int len;
         char *tmp;
         /* We'd probably do something else if 'rwflag' is 1 */
-        printf("Enter pass phrase for \"%s\"\n", u);
+        printf("Enter pass phrase for \"%s\"\n", (char *)u);
         /* get pass phrase, length 'len' into 'tmp' */
         tmp = "hello";
         //len = strlen(tmp);
@@ -237,7 +240,7 @@ int pass_cb2(char *buf, int size, int rwflag, void *u)
         return len;
 }
 
-static int write_private_key(const char *path, const RSA *key)
+static int write_private_key(const char *path, RSA *key)
 {
         char *seckey_name = str_join(path, "/private.pem");
         FILE *seckey = fopen(seckey_name, "w");
@@ -245,7 +248,7 @@ static int write_private_key(const char *path, const RSA *key)
                 perror(seckey_name);
                 return -1;
         }
-        if(PEM_write_RSAPrivateKey(seckey, key, EVP_des_ede3_cbc(), "12345678", 8, NULL, NULL) != 1){
+        if(PEM_write_RSAPrivateKey(seckey, key, EVP_des_ede3_cbc(), (unsigned char *)"12345678", 8, NULL, NULL) != 1){
                 print_error("write rsa private key err", ERR_get_error());
                 return -1;
         }
