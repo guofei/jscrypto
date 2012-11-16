@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "scriptable.h"
+#include "jsrsa.h"
 
 #define LEN_OF_FUNCNAME 50
 

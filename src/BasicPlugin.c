@@ -15,6 +15,7 @@ NPNetscapeFuncs* sBrowserFuncs = NULL;
 typedef struct InstanceData {
 	NPP npp;
 	Keys keys;
+	NPObject *pluginobject;
 } InstanceData;
 
 NP_EXPORT(NPError)
@@ -92,6 +93,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
 	struct NPClass PluginClass = {NP_CLASS_STRUCT_VERSION, NULL, NULL, NULL, hasMethod, invoke, NULL, NULL,	NULL, NULL, NULL, NULL};
 	instanceData->npp = instance;
 	instanceData->keys = keys_new();
+	instanceData->pluginobject = sBrowserFuncs->createobject(instance,&PluginClass);
 	instance->pdata = instanceData;
 
 	return NPERR_NO_ERROR;
@@ -152,6 +154,18 @@ NPP_URLNotify(NPP instance, const char* URL, NPReason reason, void* notifyData) 
 
 NPError
 NPP_GetValue(NPP instance, NPPVariable variable, void *value) {
+	if (variable == NPPVpluginScriptableNPObject) {
+		void **v = (void **)value;
+
+		InstanceData *p = instance->pdata;
+		NPObject *pluginobject = p->pluginobject;
+
+		if (pluginobject)
+			sBrowserFuncs->retainobject(pluginobject);
+
+		*v = pluginobject;
+		return NPERR_NO_ERROR;
+	}
 	return NPERR_GENERIC_ERROR;
 }
 
