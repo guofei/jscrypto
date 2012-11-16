@@ -62,4 +62,6 @@ void    NPP_URLNotify(NPP instance, const char* URL, NPReason reason, void* noti
 NPError NPP_GetValue(NPP instance, NPPVariable variable, void *value);
 NPError NPP_SetValue(NPP instance, NPNVariable variable, void *value);
 
+extern NPNetscapeFuncs* sBrowserFuncs;
+
 #endif // BasicPlugin_h_

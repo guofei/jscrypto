@@ -1,4 +1,5 @@
 #include "BasicPlugin.h"
+#include "scriptable.h"
 #include "jsrsa.h"
 
 #include <stdlib.h>
@@ -9,7 +10,7 @@
 #define PLUGIN_DESCRIPTION PLUGIN_NAME " (Mozilla SDK)"
 #define PLUGIN_VERSION     "1.0.0.0"
 
-static NPNetscapeFuncs* sBrowserFuncs = NULL;
+NPNetscapeFuncs* sBrowserFuncs = NULL;
 
 typedef struct InstanceData {
 	NPP npp;
@@ -87,6 +88,8 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
 	if (!instanceData)
 		return NPERR_OUT_OF_MEMORY_ERROR;
 	memset(instanceData, 0, sizeof(InstanceData));
+
+	struct NPClass PluginClass = {NP_CLASS_STRUCT_VERSION, NULL, NULL, NULL, hasMethod, invoke, NULL, NULL,	NULL, NULL, NULL, NULL};
 	instanceData->npp = instance;
 	instanceData->keys = keys_new();
 	instance->pdata = instanceData;
