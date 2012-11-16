@@ -1,7 +1,7 @@
 CC            = gcc
 CFLAGS        = -Wall -std=c99
-LDFLAGS       = -L/usr/local/lib
-LIBS          = -lssl -lcrypto
+LDFLAGS       = -L../src
+LIBS          = -lcryptoplugin
 TEST_OBJS     = test.o
 TEST          = test.out
 
