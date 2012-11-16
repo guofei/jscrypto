@@ -14,22 +14,40 @@ static int write_public_key(const char *path, RSA *key);
 static int write_private_key(const char *path, RSA *key, const char *password);
 static char* str_join(const char* a, const char* b);
 
-KEYS keys;
+struct Keys{
+	RSA **elem;
+	int length;
+};
 
-int pass_cb1(char *buf, int size, int rwflag, void *u)
+Keys keys_new()
 {
-        int len;
-        char *tmp;
-        /* We'd probably do something else if 'rwflag' is 1 */
-        printf("Enter pass phrase for \"%s\"\n", (char *)u);
-        /* get pass phrase, length 'len' into 'tmp' */
-        tmp = "12345678";
-        len = strlen(tmp);
-        if (len <= 0) return 0;
-        /* if too long, truncate */
-        if (len > size) len = size;
-        memcpy(buf, tmp, len);
-        return len;
+	Keys k;
+	k = malloc(sizeof(struct Keys));
+	k->elem = NULL;
+	k->length = 0;
+
+	return k;
+}
+
+void keys_push(Keys k, RSA *rsa)
+{
+	int len = sizeof(RSA *) * (k->length + 1);
+	k->elem = realloc(k->elem, len);
+	k->elem[k->length] = rsa;
+	k->length++;
+}
+
+RSA *keys_get(Keys k, int index)
+{
+	return k->elem[index];
+}
+
+void keys_free(Keys k)
+{
+	for (int i = 0; i < k->length; ++i){
+		free_rsa_key(k->elem[i]);
+	}
+	free(k);
 }
 
 RSA *read_rsa_key_from_file(const char *file, KeyType type, const char *password)

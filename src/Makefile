@@ -1,4 +1,4 @@
-CFLAGS        = -Wall -DXP_UNIX=1 -DMOZ_X11=1 -fPIC -g
+CFLAGS        = -Wall -DXP_UNIX=1 -DMOZ_X11=1 -fPIC -g -std=c99
 LIBS          = -lssl -lcrypto
 OBJS          = BasicPlugin.o jsrsa.o
 TARGET        = libcryptoplugin.so
