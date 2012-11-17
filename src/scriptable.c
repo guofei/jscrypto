@@ -6,6 +6,11 @@
 #include "scriptable.h"
 #include "jsrsa.h"
 
+typedef struct PluginObject{
+	NPObject npobj;
+	NPP npp;
+}PluginObject;
+
 #define LEN_OF_FUNCNAME 50
 
 typedef enum __FUNCNAMES{
@@ -58,8 +63,31 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 
 	switch(nType){
 	case LOAD_PUBLIC_KEY:
-
+		if(argCount != 1 || !NPVARIANT_IS_STRING(args[0]))
+			goto error;
+		NPString str = NPVARIANT_TO_STRING(args[0]);
+		const char *path = strndup((char *)str.UTF8Characters, str.UTF8Length);
+		RSA *rsa = generate_rsa_key_to_file(path, PUBLIC_KEY, NULL);
+		
 	default:
 		return false;
 	}
+error:
+	INT32_TO_NPVARIANT(-1, *result);
+	return false;
+}
+
+NPObject *allocate(NPP npp, NPClass *aClass)
+{
+	PluginObject *obj = malloc(sizeof(PluginObject));
+	//obj->npobj._class = aClass;
+	//obj->npobj.referenceCount = 1;
+	obj->npp = npp;
+	return (NPObject *)obj;
+}
+
+void deallocate(NPObject *npobj)
+{
+	PluginObject *obj = (PluginObject *)npobj;
+	free(obj);
 }

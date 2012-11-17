@@ -1,0 +1,34 @@
+<html>
+<body>
+
+<center><h1>Plugin</h1></center>
+
+<br><br>
+
+<center>
+
+
+<embed type="application/crypto" id="Crypto plugin" hidden="true">
+
+<script>
+
+plugin_call_test();
+function plugin_call_test(){
+
+  var plugin = document.getElementById("Crypto plugin");
+
+  if(!plugin){
+    alert("no plugin");
+  }else{
+    alert("succeeded load plugins");
+  }
+  //plugin.test("helloword");
+}
+
+</script>
+</center>
+
+</html>
+</body>
+
+

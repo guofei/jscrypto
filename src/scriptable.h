@@ -5,5 +5,7 @@
 
 extern bool hasMethod(NPObject *obj, NPIdentifier methodName);
 extern bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_t argCount,NPVariant *result);
+extern NPObject *allocate(NPP npp, NPClass *aClass);
+extern void deallocate(NPObject *npobj);
 
 #endif /* _SCRIPTABLE_H_ */
