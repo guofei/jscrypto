@@ -88,8 +88,10 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
 
 	instanceData->npp = instance;
 	instanceData->keys = keys_new();
-	/* struct NPClass PluginClass = {NP_CLASS_STRUCT_VERSION, allocate, deallocate, NULL, hasMethod, invoke, NULL, NULL,	NULL, NULL, NULL, NULL}; */
-	/* instanceData->pluginobject = sBrowserFuncs->createobject(instance,&PluginClass); */
+	NPObject *pluginobject = sBrowserFuncs->createobject(instance,&PluginClass);
+	PluginObject *pobj = (PluginObject *)pluginobject;
+	pobj->npp = instance;
+	instanceData->pluginobject = pluginobject;
 	instance->pdata = instanceData;
 
 	return NPERR_NO_ERROR;
@@ -153,10 +155,10 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value) {
 	if (variable == NPPVpluginScriptableNPObject) {
 		void **v = (void **)value;
 
-		/* NPObject *pluginobject = p->pluginobject; */
-		NPObject *pluginobject = sBrowserFuncs->createobject(instance,&PluginClass);
+
+		/* p->pluginobject = pluginobject; */
 		InstanceData *p = instance->pdata;
-		p->pluginobject = pluginobject;
+		NPObject *pluginobject = p->pluginobject;
 
 		if (pluginobject)
 			sBrowserFuncs->retainobject(pluginobject);

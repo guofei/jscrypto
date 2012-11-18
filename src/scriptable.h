@@ -8,4 +8,10 @@ extern bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,
 extern NPObject *allocate(NPP npp, NPClass *aClass);
 extern void deallocate(NPObject *npobj);
 
+typedef struct PluginObject{
+	struct NPObject npobj;
+	NPP npp;
+}PluginObject;
+
+
 #endif /* _SCRIPTABLE_H_ */

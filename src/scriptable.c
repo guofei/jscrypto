@@ -6,11 +6,6 @@
 #include "scriptable.h"
 #include "jsrsa.h"
 
-typedef struct PluginObject{
-	struct NPObject npobj;
-	NPP npp;
-}PluginObject;
-
 #define LEN_OF_FUNCNAME 50
 
 typedef enum __FUNCNAMES{
@@ -165,7 +160,7 @@ NPObject *allocate(NPP npp, NPClass *aClass)
 	PluginObject *obj = malloc(sizeof(PluginObject));
 	//obj->npobj._class = aClass;
 	//obj->npobj.referenceCount = 1;
-	obj->npp = npp;
+	//obj->npp = npp;
 	return (NPObject *)obj;
 }
 
