@@ -7,7 +7,7 @@
 #include "jsrsa.h"
 
 typedef struct PluginObject{
-	NPObject npobj;
+	struct NPObject npobj;
 	NPP npp;
 }PluginObject;
 
@@ -60,21 +60,62 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 	NPUTF8 *name = sBrowserFuncs->utf8fromidentifier(methodName);
 	int nType = chkMethod(name);
 	sBrowserFuncs->memfree(name);
+	PluginObject *pobj = (PluginObject *)obj;
+	InstanceData *instanceData = pobj->npp->pdata;
 
 	switch(nType){
 	case LOAD_PUBLIC_KEY:
+	{
 		if(argCount != 1 || !NPVARIANT_IS_STRING(args[0]))
 			goto error;
+		char *path = NULL;
 		NPString str = NPVARIANT_TO_STRING(args[0]);
-		const char *path = strndup((char *)str.UTF8Characters, str.UTF8Length);
-		RSA *rsa = generate_rsa_key_to_file(path, PUBLIC_KEY, NULL);
-		
+		path = malloc(str.UTF8Length + 1);
+		strncpy(path, (char *)str.UTF8Characters, str.UTF8Length);
+		path[str.UTF8Length] = 0;
+		RSA *rsa = read_rsa_key_from_file(path, PUBLIC_KEY, NULL);
+		if(rsa == NULL)
+			goto error;
+		free(path);
+		int i = keys_push(instanceData->keys, rsa);
+		INT32_TO_NPVARIANT(i, *result);
+		return true;
+	}
+	case LOAD_PRIVATE_KEY:
+	{
+		if(!NPVARIANT_IS_STRING(args[0]))
+			goto error;
+		char *path = NULL;
+		char *password = NULL;
+
+		NPString str = NPVARIANT_TO_STRING(args[0]);
+		path = malloc(str.UTF8Length + 1);
+		strncpy(path, (char *)str.UTF8Characters, str.UTF8Length);
+		path[str.UTF8Length] = 0;
+		if(argCount == 2){
+			if(!NPVARIANT_IS_STRING(args[1]))
+				goto error;
+
+			NPString str = NPVARIANT_TO_STRING(args[1]);
+			password = malloc(str.UTF8Length + 1);
+			strncpy(password, (char *)str.UTF8Characters, str.UTF8Length);
+			password[str.UTF8Length] = 0;
+		}
+		RSA *rsa = read_rsa_key_from_file(path, PRIVATE_KEY, password);
+		if(rsa == NULL)
+			goto error;
+		free(path);
+		free(password);
+		int i = keys_push(instanceData->keys, rsa);
+		INT32_TO_NPVARIANT(i, *result);
+		return true;
+	}
 	default:
 		return false;
 	}
 error:
 	INT32_TO_NPVARIANT(-1, *result);
-	return false;
+	return true;
 }
 
 NPObject *allocate(NPP npp, NPClass *aClass)

@@ -12,11 +12,7 @@
 
 NPNetscapeFuncs* sBrowserFuncs = NULL;
 
-typedef struct InstanceData {
-	NPP npp;
-	Keys keys;
-	NPObject *pluginobject;
-} InstanceData;
+static struct NPClass PluginClass = {NP_CLASS_STRUCT_VERSION, allocate, deallocate, NULL, hasMethod, invoke, NULL, NULL, NULL, NULL, NULL, NULL};
 
 NP_EXPORT(NPError)
 NP_Initialize(NPNetscapeFuncs* bFuncs, NPPluginFuncs* pFuncs)
@@ -90,10 +86,10 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
 		return NPERR_OUT_OF_MEMORY_ERROR;
 	memset(instanceData, 0, sizeof(InstanceData));
 
-	struct NPClass PluginClass = {NP_CLASS_STRUCT_VERSION, allocate, deallocate, NULL, hasMethod, invoke, NULL, NULL,	NULL, NULL, NULL, NULL};
 	instanceData->npp = instance;
 	instanceData->keys = keys_new();
-	instanceData->pluginobject = sBrowserFuncs->createobject(instance,&PluginClass);
+	/* struct NPClass PluginClass = {NP_CLASS_STRUCT_VERSION, allocate, deallocate, NULL, hasMethod, invoke, NULL, NULL,	NULL, NULL, NULL, NULL}; */
+	/* instanceData->pluginobject = sBrowserFuncs->createobject(instance,&PluginClass); */
 	instance->pdata = instanceData;
 
 	return NPERR_NO_ERROR;
@@ -157,8 +153,10 @@ NPP_GetValue(NPP instance, NPPVariable variable, void *value) {
 	if (variable == NPPVpluginScriptableNPObject) {
 		void **v = (void **)value;
 
+		/* NPObject *pluginobject = p->pluginobject; */
+		NPObject *pluginobject = sBrowserFuncs->createobject(instance,&PluginClass);
 		InstanceData *p = instance->pdata;
-		NPObject *pluginobject = p->pluginobject;
+		p->pluginobject = pluginobject;
 
 		if (pluginobject)
 			sBrowserFuncs->retainobject(pluginobject);

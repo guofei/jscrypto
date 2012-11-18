@@ -14,6 +14,25 @@ static int write_public_key(const char *path, RSA *key);
 static int write_private_key(const char *path, RSA *key, const char *password);
 static char* str_join(const char* a, const char* b);
 
+void DebugMsg(char *msg, int count)
+{
+	FILE *fp = NULL;
+	static int nfStartup = 0;
+	int pid = 0;
+
+	if(NULL != (fp = fopen("./debug-log.txt", "a+"))){
+
+		if(0 == nfStartup){
+			nfStartup = 1;
+			fprintf(fp, "::first call");
+		}
+		pid = pthread_self();
+		fprintf(fp, "::pid(%6d)::num(%6d)::", pid, count);
+		fputs(msg, fp);
+		fclose(fp);
+	}
+}
+
 struct Keys{
 	RSA **elem;
 	int length;
@@ -22,10 +41,9 @@ struct Keys{
 Keys keys_new()
 {
 	Keys k;
-	k = malloc(sizeof(struct Keys));
+	k = (Keys)malloc(sizeof(struct Keys));
 	k->elem = NULL;
 	k->length = 0;
-
 	return k;
 }
 
