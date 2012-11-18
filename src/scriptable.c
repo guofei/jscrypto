@@ -16,14 +16,18 @@ typedef struct PluginObject{
 typedef enum __FUNCNAMES{
 	LOAD_PUBLIC_KEY = 1,
 	LOAD_PRIVATE_KEY,
+	ENCRYPT,
+	DECRYPT,
 	TEST,
 	NUM_OF_FUNCS
 }FUNCNAMES;
 
 static char arrayFuncNames[NUM_OF_FUNCS][LEN_OF_FUNCNAME] = {
-	{ "" },
-	{ "load_public_key" },
-	{ "load_private_key" },
+	{""},
+	{"load_public_key"},
+	{"load_private_key"},
+	{"encrypt"},
+	{"decrypt"},
 	{ "test" }
 };
 
@@ -108,6 +112,44 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 		free(password);
 		int i = keys_push(instanceData->keys, rsa);
 		INT32_TO_NPVARIANT(i, *result);
+		return true;
+	}
+	case ENCRYPT:
+	{
+		if(argCount != 2 || (!NPVARIANT_IS_INT32(args[0]) && !NPVARIANT_IS_DOUBLE(args[0])) || !NPVARIANT_IS_STRING(args[1]))
+			goto error;
+
+		int key_index = 0;
+		if(NPVARIANT_IS_INT32(args[0]))
+			key_index = NPVARIANT_TO_INT32(args[0]);
+		else if(NPVARIANT_IS_DOUBLE(args[0]))
+			key_index = NPVARIANT_TO_DOUBLE(args[0]);
+		NPString str = NPVARIANT_TO_STRING(args[1]);
+		char *text = malloc(str.UTF8Length + 1);
+		strncpy(text, (char *)str.UTF8Characters, str.UTF8Length);
+		text[str.UTF8Length] = 0;
+		char *data = public_encrypt(keys_get(instanceData->keys, key_index), text, str.UTF8Length);
+		free(text);
+		STRINGZ_TO_NPVARIANT(data, *result);
+		return true;
+	}
+	case DECRYPT:
+	{
+		if(argCount != 2 || (!NPVARIANT_IS_INT32(args[0]) && !NPVARIANT_IS_DOUBLE(args[0])) || !NPVARIANT_IS_STRING(args[1]))
+			goto error;
+
+		int key_index = 0;
+		if(NPVARIANT_IS_INT32(args[0]))
+			key_index = NPVARIANT_TO_INT32(args[0]);
+		else if(NPVARIANT_IS_DOUBLE(args[0]))
+			key_index = NPVARIANT_TO_DOUBLE(args[0]);
+		NPString str = NPVARIANT_TO_STRING(args[1]);
+		char *text = malloc(str.UTF8Length + 1);
+		strncpy(text, (char *)str.UTF8Characters, str.UTF8Length);
+		text[str.UTF8Length] = 0;
+		char *data = private_decrypt(keys_get(instanceData->keys, key_index), text, str.UTF8Length);
+		free(text);
+		STRINGZ_TO_NPVARIANT(data, *result);
 		return true;
 	}
 	default:

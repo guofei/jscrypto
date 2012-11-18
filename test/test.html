@@ -22,10 +22,14 @@ function plugin_call_test(){
   }else{
     alert("succeeded load plugins");
   }
-  var ret = plugin.load_public_key("/home/kaku/project/jscrypto/test/public.pem");
-  alert(ret);
-  var ret = plugin.load_private_key("/home/kaku/project/jscrypto/test/private.pem", "12345678");
-  alert(ret);
+  var pub = plugin.load_public_key("/home/kaku/project/jscrypto/test/public.pem");
+  alert(pub);
+  var pri = plugin.load_private_key("/home/kaku/project/jscrypto/test/private.pem", "12345678");
+  alert(pri);
+  var ciphertext = plugin.encrypt(pub, "abc");
+  alert(ciphertext);
+  var text = plugin.decrypt(pri, ciphertext);
+  alert(text);
   //plugin.test("helloword");
 }
 

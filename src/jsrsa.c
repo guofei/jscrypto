@@ -52,7 +52,7 @@ int keys_push(Keys k, RSA *rsa)
 	int len = sizeof(RSA *) * (k->length + 1);
 	k->elem = realloc(k->elem, len);
 	k->elem[k->length] = rsa;
-	return ++k->length;
+	return k->length++;
 }
 
 RSA *keys_get(Keys k, int index)
