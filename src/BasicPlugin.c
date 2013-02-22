@@ -14,47 +14,51 @@ NPNetscapeFuncs* sBrowserFuncs = NULL;
 
 static struct NPClass PluginClass = {NP_CLASS_STRUCT_VERSION, allocate, deallocate, NULL, hasMethod, invoke, NULL, NULL, NULL, NULL, NULL, NULL};
 
-NP_EXPORT(NPError)
-NP_Initialize(NPNetscapeFuncs* bFuncs, NPPluginFuncs* pFuncs)
+NPError NP_Initialize(NPNetscapeFuncs *browserFuncs)
 {
-	sBrowserFuncs = bFuncs;
-
-	// Check the size of the provided structure based on the offset of the
-	// last member we need.
-	if (pFuncs->size < (offsetof(NPPluginFuncs, setvalue) + sizeof(void*)))
-		return NPERR_INVALID_FUNCTABLE_ERROR;
-
-	pFuncs->newp = NPP_New;
-	pFuncs->destroy = NPP_Destroy;
-	pFuncs->setwindow = NPP_SetWindow;
-	pFuncs->newstream = NPP_NewStream;
-	pFuncs->destroystream = NPP_DestroyStream;
-	pFuncs->asfile = NPP_StreamAsFile;
-	pFuncs->writeready = NPP_WriteReady;
-	pFuncs->write = NPP_Write;
-	pFuncs->print = NPP_Print;
-	pFuncs->event = NPP_HandleEvent;
-	pFuncs->urlnotify = NPP_URLNotify;
-	pFuncs->getvalue = NPP_GetValue;
-	pFuncs->setvalue = NPP_SetValue;
+        DebugMsg("init", 0);
+	sBrowserFuncs = browserFuncs;
 
 	return NPERR_NO_ERROR;
 }
 
-NP_EXPORT(char*)
-NP_GetPluginVersion()
+NPError NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
+{
+        /* Check the size of the provided structure based on the offset of the
+           last member we need. */
+        if (pluginFuncs->size < (offsetof(NPPluginFuncs, setvalue) + sizeof(void*)))
+                return NPERR_INVALID_FUNCTABLE_ERROR;
+
+        pluginFuncs->newp = NPP_New;
+        pluginFuncs->destroy = NPP_Destroy;
+        pluginFuncs->setwindow = NPP_SetWindow;
+        pluginFuncs->newstream = NPP_NewStream;
+        pluginFuncs->destroystream = NPP_DestroyStream;
+        pluginFuncs->asfile = NPP_StreamAsFile;
+        pluginFuncs->writeready = NPP_WriteReady;
+        pluginFuncs->write = (NPP_WriteProcPtr)NPP_Write;
+        pluginFuncs->print = NPP_Print;
+        pluginFuncs->event = NPP_HandleEvent;
+        pluginFuncs->urlnotify = NPP_URLNotify;
+        pluginFuncs->getvalue = NPP_GetValue;
+        pluginFuncs->setvalue = NPP_SetValue;
+
+        return NPERR_NO_ERROR;
+}
+
+
+NPError NP_GetPluginVersion()
 {
 	return PLUGIN_VERSION;
 }
 
-NP_EXPORT(const char*)
-NP_GetMIMEDescription()
+NPError NP_GetMIMEDescription()
 {
 	return "application/crypto:crypto:Crypto plugin";
 }
 
-NP_EXPORT(NPError)
-NP_GetValue(void* future, NPPVariable aVariable, void* aValue) {
+NPError NP_GetValue(void* future, NPPVariable aVariable, void* aValue) {
+        DebugMsg("getvalue!!!", 1);
 	switch (aVariable) {
 	case NPPVpluginNameString:
 		*((char**)aValue) = PLUGIN_NAME;
@@ -69,8 +73,7 @@ NP_GetValue(void* future, NPPVariable aVariable, void* aValue) {
 	return NPERR_NO_ERROR;
 }
 
-NP_EXPORT(NPError)
-NP_Shutdown()
+NPError NP_Shutdown()
 {
 	return NPERR_NO_ERROR;
 }

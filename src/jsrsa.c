@@ -20,7 +20,7 @@ void DebugMsg(char *msg, int count)
 	static int nfStartup = 0;
 	int pid = 0;
 
-	if(NULL != (fp = fopen("./debug-log.txt", "a+"))){
+	if(NULL != (fp = fopen("/tmp/debug-log.txt", "a+"))){
 
 		if(0 == nfStartup){
 			nfStartup = 1;

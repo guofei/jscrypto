@@ -7,13 +7,18 @@
 
 <center>
 
-
-<embed type="application/crypto" id="Crypto plugin" hidden="true">
+<embed type="application/crypto" id="Crypto plugin 2" hidden="true">
 
 <script>
 
 plugin_call_test();
 function plugin_call_test(){
+
+  var ele = document.createElement("embed");
+  ele.setAttribute("type", "application/crypto");
+  ele.setAttribute("id", "Crypto plugin");
+  document.body.appendChild(ele);
+
 
   var plugin = document.getElementById("Crypto plugin");
 
@@ -22,9 +27,9 @@ function plugin_call_test(){
   }else{
     alert("succeeded load plugins");
   }
-  var pub = plugin.load_public_key("/home/kaku/project/jscrypto/test/public.pem");
+  var pub = plugin.load_public_key("/Users/kaku/Programs/M2/jscrypto/test/public.pem");
   alert(pub);
-  var pri = plugin.load_private_key("/home/kaku/project/jscrypto/test/private.pem", "12345678");
+  var pri = plugin.load_private_key("/Users/kaku/Programs/M2/jscrypto/test/private.pem", "12345678");
   alert(pri);
   var ciphertext = plugin.encrypt(pub, "abc");
   alert(ciphertext);
