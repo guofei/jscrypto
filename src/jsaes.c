@@ -6,7 +6,8 @@
 #define KEYGEN_SALT  NULL
 #define KEYGEN_COUNT 2048
 
-static EVP_CIPHER_CTX *get_ctx(char *passwd){
+EVP_CIPHER_CTX *cipher_ctx_new(char *passwd)
+{
         EVP_CIPHER_CTX *ctx = malloc(sizeof(EVP_CIPHER_CTX));
         const EVP_CIPHER *cipher = EVP_aes_256_ecb();
         unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH];
@@ -25,18 +26,29 @@ static EVP_CIPHER_CTX *get_ctx(char *passwd){
 	return ctx;
 }
 
-static void free_ctx(EVP_CIPHER_CTX *ctx){
+void cipher_ctx_free(EVP_CIPHER_CTX *ctx)
+{
 	free(ctx);
 }
 
-int counter_encrypt_or_decrypt (char *passwd,
+unsigned char *counter_new(int i, EVP_CIPHER_CTX *ctx)
+{
+	unsigned char *counter = calloc(EVP_CIPHER_CTX_block_size(ctx), sizeof(unsigned char));
+	memcpy(counter, &i, sizeof(int));
+	return counter;
+}
+
+void counter_free(unsigned char *counter)
+{
+	free(counter);
+}
+
+int counter_encrypt_or_decrypt (EVP_CIPHER_CTX *ctx,
                                 char *pt,  /* a buffer containing the data to be encrypted or decrypted */
                                 char *ct,  /* a buffer that will contain the crypted or encrypted data */
                                 int len,   /* the number of bytes from the input buffer, pt, to process */
                                 unsigned char *counter)
 {
-        EVP_CIPHER_CTX *ctx = get_ctx(passwd);
-		
         int i, j, where = 0, num, bl = EVP_CIPHER_CTX_block_size (ctx);
         char encr_ctrs[len + bl];/* Encrypted counters. */
 
@@ -62,7 +74,6 @@ int counter_encrypt_or_decrypt (char *passwd,
                 ct[i] = pt[i] ^ encr_ctrs[i];
 
         /* Success. */
-	free_ctx(ctx);
         return 1;
 }
 

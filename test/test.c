@@ -28,25 +28,28 @@ int main(int argc, char **argv)
 
 	keys_free(k);
 
-	char *passwd = "123456";
+	EVP_CIPHER_CTX *ctx = cipher_ctx_new("123456");
+
 	int n = 1000;
 	char *pt = malloc(sizeof(char) * n);
 	for (int i = 0; i < n; ++i)
 		pt[i] = 'a';
-
+	pt[n-1] = 0;
 	char *ct = calloc(n, sizeof(unsigned char));
-	unsigned char *counter = calloc(16, sizeof(unsigned char));
+	unsigned char *counter = counter_new(1, ctx);
 
-	counter_encrypt_or_decrypt(passwd, pt, ct, n, counter);
+	counter_encrypt_or_decrypt(ctx, pt, ct, n, counter);
 
-	char *ct2 = calloc(n, sizeof(unsigned char));
-	unsigned char *counter2 = calloc(16, sizeof(unsigned char));
-	counter_encrypt_or_decrypt(passwd, ct, ct2, n, counter2);
+	char *ct2 = calloc(n+1, sizeof(unsigned char));
+	unsigned char *counter2 = counter_new(1, ctx);
+	counter_encrypt_or_decrypt(ctx, ct, ct2, n, counter2);
 
-	if(strcmp(pt, ct2) == 0 && strcmp(counter, counter2) == 0)
+	if(strcmp(pt, ct2) == 0)
 		printf ("%s\n","counter encrypt ok");
 	else
 		printf ("%s\n","counter encrypt error");
 
+	if(strcmp(counter, counter2) != 0)
+		printf ("%s\n","counter error");
 	return 0;
 }
