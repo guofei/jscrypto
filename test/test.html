@@ -22,9 +22,9 @@ function plugin_call_test(){
   }else{
     alert("succeeded load plugins");
   }
-  var pub = plugin.load_public_key("/home/kaku/project/jscrypto/test/public.pem");
+  var pub = plugin.load_public_key("/home/kaku/M2/jscrypto/test/public.pem");
   alert(pub);
-  var pri = plugin.load_private_key("/home/kaku/project/jscrypto/test/private.pem", "12345678");
+  var pri = plugin.load_private_key("/home/kaku/M2/jscrypto/test/private.pem", "12345678");
   alert(pri);
   var ciphertext = plugin.encrypt(pub, "abc");
   alert(ciphertext);

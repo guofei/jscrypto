@@ -1,5 +1,5 @@
-CC            = gcc
-CFLAGS        = -Wall -std=c99
+CC            = gcc -std=c99
+CFLAGS        = -Wall
 LDFLAGS       = -L../src
 LIBS          = -lcryptoplugin
 TEST_OBJS     = test.o
