@@ -1,6 +1,6 @@
 CFLAGS        = -Wall -DXP_UNIX=1 -DMOZ_X11=1 -fPIC -g -std=c99
 LIBS          = -lssl -lcrypto
-OBJS          = BasicPlugin.o jsrsa.o jsaes.o scriptable.o
+OBJS          = BasicPlugin.o jsrsa.o jsaes.o scriptable.o np_array.o
 TARGET        = libcryptoplugin.so
 
 all: $(TARGET)
@@ -13,8 +13,9 @@ $(TARGET) : $(OBJS)
 
 BasicPlugin.o: BasicPlugin.h
 jsrsa.o: jsrsa.h
-jsaes.o: jsaes.o
+jsaes.o: jsaes.h
 scriptable.o: scriptable.h
+np_array.o: np_array.h
 
 clean :
 	rm *.so *.o
