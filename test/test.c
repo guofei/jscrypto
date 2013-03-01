@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "../src/jsrsa.h"
+#include "../src/jsaes.h"
 
 int main(int argc, char **argv)
 {
@@ -26,6 +27,12 @@ int main(int argc, char **argv)
   printf ("%s\n",text2);
 
   keys_free(k);
+
+  char *passwd = "123456";
+  char pt[10] = "abcdefghij";
+  char ct[10];
+  unsigned char *counter = "123";
+  counter_encrypt_or_decrypt(passwd, pt, ct, 10, counter);
 
   return 0;
 }
