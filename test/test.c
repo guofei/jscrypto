@@ -70,7 +70,10 @@ int main(int argc, char **argv)
 	if(strcmp(counter, counter2) != 0)
 		printf ("%s\n","counter error");
 
-
+	char *text11, *text22;
+	counter_encrypt(ctx, "0123456789", &text11, 10, counter);
+	counter_decrypt(ctx, text11, &text22, 10, counter2);
+	printf ("%s\n",text22);
 	// test nparray
 
 	NP_Array array = NP_Array_new();

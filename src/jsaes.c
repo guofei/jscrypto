@@ -45,14 +45,23 @@ void counter_free(unsigned char *counter)
 	free(counter);
 }
 
-int counter_encrypt(EVP_CIPHER_CTX *ctx, char *pt, char *ct, int len, unsigned char *counter)
+int counter_encrypt(EVP_CIPHER_CTX *ctx, char *pt, char **result, int len, unsigned char *counter)
 {
+	char *ct = malloc(len * sizeof(char));
 	counter_encrypt_or_decrypt(ctx, pt, ct, len, counter);
+	base64_encode(ct, len, result);
+	return 0;
 }
 
-int counter_decrypt(EVP_CIPHER_CTX *ctx, char *pt, char *ct, int len, unsigned char *counter)
+int counter_decrypt(EVP_CIPHER_CTX *ctx, char *pt, char **result, int len, unsigned char *counter)
 {
-	
+	char *text;
+	int text_len = base64_decode(pt, &text);
+	char *ct = malloc(text_len * sizeof(char));
+	counter_encrypt_or_decrypt(ctx, text, ct, text_len, counter);
+	*result = ct;
+	free(text);
+	return 0;
 }
 
 int counter_encrypt_or_decrypt (EVP_CIPHER_CTX *ctx,
