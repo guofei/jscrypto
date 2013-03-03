@@ -14,6 +14,8 @@ typedef enum __FUNCNAMES{
 	ENCRYPT,
 	DECRYPT,
 	COUNTER_CREATE,
+	COUNTER_ENCRYPT,
+	COUNTER_DECRYPT,
 	COUNTER_ENCRYPT_OR_DECRYPT,
 	TEST,
 	NUM_OF_FUNCS
@@ -26,6 +28,8 @@ static char arrayFuncNames[NUM_OF_FUNCS][LEN_OF_FUNCNAME] = {
 	{"encrypt"},
 	{"decrypt"},
 	{"counter_create"},
+	{"counter_encrypt"},
+	{"counter_decrypt"},
 	{"counter_encrypt_or_decrypt"},
 	{ "test" }
 };
@@ -91,7 +95,30 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 		
 		return true;
 	}
-	case COUNTER_ENCRYPT_OR_DECRYPT:
+	case COUNTER_ENCRYPT:
+	{
+		if(argCount != 3
+		   || !NPVARIANT_IS_STRING(args[0])
+		   || !NPVARIANT_IS_STRING(args[1])
+		   || (!NPVARIANT_IS_INT32(args[2]) && !NPVARIANT_IS_DOUBLE(args[2])))
+			goto error;
+
+		char *password = npstring_to_char(NPVARIANT_TO_STRING(args[0]));
+		char *text = npstring_to_char(NPVARIANT_TO_STRING(args[1]));
+		int counter = -1;
+		if(NPVARIANT_IS_INT32(args[2]))
+			counter = NPVARIANT_TO_INT32(args[2]);
+		else if(NPVARIANT_IS_DOUBLE(args[2]))
+			counter = NPVARIANT_TO_DOUBLE(args[2]);
+
+		char *cipher_text;
+		counter_encrypt(password, text, &cipher_text, strlen(text), NP_Array_get(instanceData->counter_array, counter));
+		free(text);
+		free(password);
+		STRINGZ_TO_NPVARIANT(cipher_text, *result);
+		return true;
+	}
+	case COUNTER_DECRYPT:
 	{
 		if(argCount != 3
 		   || !NPVARIANT_IS_STRING(args[0])
@@ -101,12 +128,16 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 		char *password = npstring_to_char(NPVARIANT_TO_STRING(args[0]));
 		char *text = npstring_to_char(NPVARIANT_TO_STRING(args[1]));
 		int counter = -1;
-		if(NPVARIANT_IS_INT32(args[0]))
-			counter = NPVARIANT_TO_INT32(args[0]);
-		else if(NPVARIANT_IS_DOUBLE(args[0]))
-			counter = NPVARIANT_TO_DOUBLE(args[0]);
+		if(NPVARIANT_IS_INT32(args[2]))
+			counter = NPVARIANT_TO_INT32(args[2]);
+		else if(NPVARIANT_IS_DOUBLE(args[2]))
+			counter = NPVARIANT_TO_DOUBLE(args[2]);
 
-		
+		char *ret;
+		counter_encrypt(password, text, &ret, strlen(text), NP_Array_get(instanceData->counter_array, counter));
+		free(text);
+		free(password);
+		STRINGZ_TO_NPVARIANT(ret, *result);
 		return true;
 	}
 	case LOAD_PUBLIC_KEY:
