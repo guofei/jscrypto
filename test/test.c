@@ -3,9 +3,11 @@
 
 #include "../src/jsrsa.h"
 #include "../src/jsaes.h"
+#include "../src/np_array.h"
 
 int main(int argc, char **argv)
 {
+	// test jsrsa
 	unsigned char tt[] = "abc";
 
 	generate_rsa_key_to_file("./", 1024, "12345678");
@@ -28,6 +30,7 @@ int main(int argc, char **argv)
 
 	keys_free(k);
 
+	// test jsaes
 	EVP_CIPHER_CTX *ctx = cipher_ctx_new("123456");
 
 	int n = 1000;
@@ -51,5 +54,16 @@ int main(int argc, char **argv)
 
 	if(strcmp(counter, counter2) != 0)
 		printf ("%s\n","counter error");
+
+
+	// test nparray
+
+	NP_Array array = NP_Array_new();
+	EVP_CIPHER_CTX *elem1 = cipher_ctx_new("123456");
+	EVP_CIPHER_CTX *elem2 = cipher_ctx_new("234567");
+	int n1 = NP_Array_push(array, elem1);
+	int n2 = NP_Array_push(array, elem2);
+	EVP_CIPHER_CTX *elem3 = NP_Array_get(array, n1);
+	NP_Array_free(array, cipher_ctx_free);
 	return 0;
 }
