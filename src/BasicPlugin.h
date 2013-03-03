@@ -63,12 +63,15 @@ NPError NPP_GetValue(NPP instance, NPPVariable variable, void *value);
 NPError NPP_SetValue(NPP instance, NPNVariable variable, void *value);
 
 #include "jsrsa.h"
+#include "jsaes.h"
+#include "np_array.h"
 
 extern NPNetscapeFuncs* sBrowserFuncs;
 
 typedef struct InstanceData {
 	NPP npp;
 	Keys keys;
+  NP_Array counter_array;
 	NPObject *pluginobject;
 } InstanceData;
 

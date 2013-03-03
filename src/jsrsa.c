@@ -300,21 +300,3 @@ int test(int test){
         return 0;
 }
 
-char *unbase64(unsigned char *input, int length)
-{
-        BIO *b64, *bmem;
-
-        char *buffer = (char *)malloc(length);
-        memset(buffer, 0, length);
-
-        b64 = BIO_new(BIO_f_base64());
-        BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
-        bmem = BIO_new_mem_buf(input, length);
-        bmem = BIO_push(b64, bmem);
-
-        BIO_read(bmem, buffer, length);
-
-        BIO_free_all(bmem);
-
-        return buffer;
-}

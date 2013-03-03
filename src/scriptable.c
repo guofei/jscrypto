@@ -13,6 +13,8 @@ typedef enum __FUNCNAMES{
 	LOAD_PRIVATE_KEY,
 	ENCRYPT,
 	DECRYPT,
+	COUNTER_CREATE,
+	COUNTER_ENCRYPT_OR_DECRYPT,
 	TEST,
 	NUM_OF_FUNCS
 }FUNCNAMES;
@@ -23,6 +25,8 @@ static char arrayFuncNames[NUM_OF_FUNCS][LEN_OF_FUNCNAME] = {
 	{"load_private_key"},
 	{"encrypt"},
 	{"decrypt"},
+	{"counter_create"},
+	{"counter_encrypt_or_decrypt"},
 	{ "test" }
 };
 
@@ -55,6 +59,12 @@ bool hasMethod(NPObject *obj, NPIdentifier methodName){
 	return result;
 }
 
+static char *npstring_to_char(NPString s){
+	char *ret = calloc(s.UTF8Length + 1, sizeof(char));
+	strncpy(ret, (char *)s.UTF8Characters, s.UTF8Length);
+	return ret;
+}
+
 bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_t argCount,NPVariant *result){
 	NPUTF8 *name = sBrowserFuncs->utf8fromidentifier(methodName);
 	int nType = chkMethod(name);
@@ -63,6 +73,42 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 	InstanceData *instanceData = pobj->npp->pdata;
 
 	switch(nType){
+	case COUNTER_CREATE:
+	{
+		if(argCount != 1 || (!NPVARIANT_IS_INT32(args[0]) && !NPVARIANT_IS_DOUBLE(args[0])))
+			goto error;
+
+		int num = 0;
+		if(NPVARIANT_IS_INT32(args[0]))
+			num = NPVARIANT_TO_INT32(args[0]);
+		else if(NPVARIANT_IS_DOUBLE(args[0]))
+			num = NPVARIANT_TO_DOUBLE(args[0]);
+
+		EVP_CIPHER_CTX *ctx = cipher_ctx_new("test");
+		unsigned char *c = counter_new(num, ctx);
+		cipher_ctx_free(ctx);
+		INT32_TO_NPVARIANT(NP_Array_push(instanceData->counter_array, c), *result);
+		
+		return true;
+	}
+	case COUNTER_ENCRYPT_OR_DECRYPT:
+	{
+		if(argCount != 3
+		   || !NPVARIANT_IS_STRING(args[0])
+		   || !NPVARIANT_IS_STRING(args[1])
+		   || (!NPVARIANT_IS_INT32(args[2]) && !NPVARIANT_IS_DOUBLE(args[2])))
+			goto error;
+		char *password = npstring_to_char(NPVARIANT_TO_STRING(args[0]));
+		char *text = npstring_to_char(NPVARIANT_TO_STRING(args[1]));
+		int counter = -1;
+		if(NPVARIANT_IS_INT32(args[0]))
+			counter = NPVARIANT_TO_INT32(args[0]);
+		else if(NPVARIANT_IS_DOUBLE(args[0]))
+			counter = NPVARIANT_TO_DOUBLE(args[0]);
+
+		
+		return true;
+	}
 	case LOAD_PUBLIC_KEY:
 	{
 		if(argCount != 1 || !NPVARIANT_IS_STRING(args[0]))

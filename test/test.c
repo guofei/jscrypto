@@ -4,9 +4,20 @@
 #include "../src/jsrsa.h"
 #include "../src/jsaes.h"
 #include "../src/np_array.h"
+#include "../src/base64.h"
 
 int main(int argc, char **argv)
 {
+	// base64
+	char* base64EncodeOutput;
+	base64_encode("Hello World", &base64EncodeOutput);
+	printf("Output (base64): %s\n", base64EncodeOutput);
+
+	char* base64DecodeOutput;
+	base64_decode("SGVsbG8gV29ybGQ=", &base64DecodeOutput);
+	base64_calc_decode_length(base64EncodeOutput);
+	printf("Output: %s\n", base64DecodeOutput);
+	
 	// test jsrsa
 	unsigned char tt[] = "abc";
 
@@ -34,11 +45,11 @@ int main(int argc, char **argv)
 	EVP_CIPHER_CTX *ctx = cipher_ctx_new("123456");
 
 	int n = 1000;
-	char *pt = malloc(sizeof(char) * n);
+	char *pt = malloc(sizeof(char) * (n+1));
 	for (int i = 0; i < n; ++i)
 		pt[i] = 'a';
-	pt[n-1] = 0;
-	char *ct = calloc(n, sizeof(unsigned char));
+	pt[n] = 0;
+	char *ct = calloc(n+1, sizeof(unsigned char));
 	unsigned char *counter = counter_new(1, ctx);
 
 	counter_encrypt_or_decrypt(ctx, pt, ct, n, counter);

@@ -30,6 +30,8 @@ function plugin_call_test(){
   alert(ciphertext);
   var text = plugin.decrypt(pri, ciphertext);
   alert(text);
+  var ppp = plugin.counter_encrypt_or_decrypt();
+  alert(ppp);
   //plugin.test("helloword");
 }
 

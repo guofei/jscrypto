@@ -88,6 +88,7 @@ NPP_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* 
 
 	instanceData->npp = instance;
 	instanceData->keys = keys_new();
+	instanceData->counter_array = NP_Array_new();
 	NPObject *pluginobject = sBrowserFuncs->createobject(instance,&PluginClass);
 	PluginObject *pobj = (PluginObject *)pluginobject;
 	pobj->npp = instance;
@@ -101,6 +102,7 @@ NPError
 NPP_Destroy(NPP instance, NPSavedData** save) {
 	InstanceData* instanceData = (InstanceData*)(instance->pdata);
 	keys_free(instanceData->keys);
+	NP_Array_free(instanceData->counter_array, counter_free);
 	free(instanceData);
 	return NPERR_NO_ERROR;
 }
