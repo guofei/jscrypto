@@ -144,11 +144,7 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 	{
 		if(argCount != 1 || !NPVARIANT_IS_STRING(args[0]))
 			goto error;
-		char *path = NULL;
-		NPString str = NPVARIANT_TO_STRING(args[0]);
-		path = malloc(str.UTF8Length + 1);
-		strncpy(path, (char *)str.UTF8Characters, str.UTF8Length);
-		path[str.UTF8Length] = 0;
+		char *path = npstring_to_char(NPVARIANT_TO_STRING(args[0]));
 		RSA *rsa = read_rsa_key_from_file(path, PUBLIC_KEY, NULL);
 		if(rsa == NULL)
 			goto error;
@@ -161,21 +157,14 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 	{
 		if(!NPVARIANT_IS_STRING(args[0]))
 			goto error;
-		char *path = NULL;
+		char *path = npstring_to_char(NPVARIANT_TO_STRING(args[0]));
 		char *password = NULL;
-
-		NPString str = NPVARIANT_TO_STRING(args[0]);
-		path = malloc(str.UTF8Length + 1);
-		strncpy(path, (char *)str.UTF8Characters, str.UTF8Length);
-		path[str.UTF8Length] = 0;
+		
 		if(argCount == 2){
 			if(!NPVARIANT_IS_STRING(args[1]))
 				goto error;
 
-			NPString str = NPVARIANT_TO_STRING(args[1]);
-			password = malloc(str.UTF8Length + 1);
-			strncpy(password, (char *)str.UTF8Characters, str.UTF8Length);
-			password[str.UTF8Length] = 0;
+			password = npstring_to_char(NPVARIANT_TO_STRING(args[1]));
 		}
 		RSA *rsa = read_rsa_key_from_file(path, PRIVATE_KEY, password);
 		if(rsa == NULL)
@@ -196,11 +185,9 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 			key_index = NPVARIANT_TO_INT32(args[0]);
 		else if(NPVARIANT_IS_DOUBLE(args[0]))
 			key_index = NPVARIANT_TO_DOUBLE(args[0]);
-		NPString str = NPVARIANT_TO_STRING(args[1]);
-		char *text = malloc(str.UTF8Length + 1);
-		strncpy(text, (char *)str.UTF8Characters, str.UTF8Length);
-		text[str.UTF8Length] = 0;
-		char *data = public_encrypt(keys_get(instanceData->keys, key_index), text, str.UTF8Length);
+
+		char *text = npstring_to_char(NPVARIANT_TO_STRING(args[1]));
+		char *data = public_encrypt(keys_get(instanceData->keys, key_index), text, strlen(text));
 		free(text);
 		STRINGZ_TO_NPVARIANT(data, *result);
 		return true;
@@ -215,11 +202,9 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 			key_index = NPVARIANT_TO_INT32(args[0]);
 		else if(NPVARIANT_IS_DOUBLE(args[0]))
 			key_index = NPVARIANT_TO_DOUBLE(args[0]);
-		NPString str = NPVARIANT_TO_STRING(args[1]);
-		char *text = malloc(str.UTF8Length + 1);
-		strncpy(text, (char *)str.UTF8Characters, str.UTF8Length);
-		text[str.UTF8Length] = 0;
-		char *data = private_decrypt(keys_get(instanceData->keys, key_index), text, str.UTF8Length);
+
+		char *text = npstring_to_char(NPVARIANT_TO_STRING(args[1]));
+		char *data = private_decrypt(keys_get(instanceData->keys, key_index), text, strlen(text));
 		free(text);
 		STRINGZ_TO_NPVARIANT(data, *result);
 		return true;
