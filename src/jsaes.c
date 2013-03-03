@@ -3,6 +3,8 @@
 #include <string.h>
 #include <openssl/evp.h>
 
+#include "base64.h"
+
 #define KEYGEN_SALT  NULL
 #define KEYGEN_COUNT 2048
 
@@ -41,6 +43,16 @@ unsigned char *counter_new(int i, EVP_CIPHER_CTX *ctx)
 void counter_free(unsigned char *counter)
 {
 	free(counter);
+}
+
+int counter_encrypt(EVP_CIPHER_CTX *ctx, char *pt, char *ct, int len, unsigned char *counter)
+{
+	counter_encrypt_or_decrypt(ctx, pt, ct, len, counter);
+}
+
+int counter_decrypt(EVP_CIPHER_CTX *ctx, char *pt, char *ct, int len, unsigned char *counter)
+{
+	
 }
 
 int counter_encrypt_or_decrypt (EVP_CIPHER_CTX *ctx,

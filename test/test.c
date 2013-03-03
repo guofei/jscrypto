@@ -10,12 +10,16 @@ int main(int argc, char **argv)
 {
 	// base64
 	char* base64EncodeOutput;
-	base64_encode("Hello World", &base64EncodeOutput);
+	//char *t = "Hello world";
+	char *t = calloc(10, sizeof(char));
+	t[0] = 1;
+	t[3] = 22;
+	t[5] = 33;
+	base64_encode(t, 10, &base64EncodeOutput);
 	printf("Output (base64): %s\n", base64EncodeOutput);
 
 	char* base64DecodeOutput;
-	base64_decode("SGVsbG8gV29ybGQ=", &base64DecodeOutput);
-	base64_calc_decode_length(base64EncodeOutput);
+	int b64_l = base64_decode(base64EncodeOutput, &base64DecodeOutput);
 	printf("Output: %s\n", base64DecodeOutput);
 	
 	// test jsrsa

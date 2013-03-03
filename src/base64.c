@@ -3,12 +3,12 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 
-int base64_encode(const char* message, char** buffer)
+int base64_encode(const char* message, int length, char** buffer)
 {
 	BIO *bio, *b64;
 	size_t size;
 	FILE* stream;
-	int encodedSize = 4*ceil((double)strlen(message)/3);
+	int encodedSize = 4*ceil((double)length/3);
 	*buffer = (char *)malloc(encodedSize+1);
 
 	stream = fmemopen(*buffer, encodedSize+1, "w");
@@ -16,7 +16,7 @@ int base64_encode(const char* message, char** buffer)
 	bio = BIO_new_fp(stream, BIO_NOCLOSE);
 	bio = BIO_push(b64, bio);
 	BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL); //Ignore newlines - write everything in one line
-	BIO_write(bio, message, strlen(message));
+	BIO_write(bio, message, length);
 	BIO_flush(bio);
 	BIO_free_all(bio);
 	fclose(stream);

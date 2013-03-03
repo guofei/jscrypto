@@ -13,6 +13,9 @@ extern int counter_encrypt_or_decrypt (EVP_CIPHER_CTX *ctx,
                                 int len,   /* the number of bytes from the input buffer, pt, to process */
                                 unsigned char *counter);
 
+extern int counter_encrypt(EVP_CIPHER_CTX *ctx, char *pt, char *ct, int len, unsigned char *counter);
+extern int counter_decrypt(EVP_CIPHER_CTX *ctx, char *pt, char *ct, int len, unsigned char *counter);
+
 
 
 /* not be used */
