@@ -149,7 +149,7 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 		if(rsa == NULL)
 			goto error;
 		free(path);
-		int i = keys_push(instanceData->keys, rsa);
+		int i = NP_Array_push(instanceData->rsakey_array, rsa);
 		INT32_TO_NPVARIANT(i, *result);
 		return true;
 	}
@@ -171,7 +171,7 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 			goto error;
 		free(path);
 		free(password);
-		int i = keys_push(instanceData->keys, rsa);
+		int i = NP_Array_push(instanceData->rsakey_array, rsa);
 		INT32_TO_NPVARIANT(i, *result);
 		return true;
 	}
@@ -187,7 +187,7 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 			key_index = NPVARIANT_TO_DOUBLE(args[0]);
 
 		char *text = npstring_to_char(NPVARIANT_TO_STRING(args[1]));
-		char *data = public_encrypt(keys_get(instanceData->keys, key_index), text, strlen(text));
+		char *data = public_encrypt(NP_Array_get(instanceData->rsakey_array, key_index), text, strlen(text));
 		free(text);
 		STRINGZ_TO_NPVARIANT(data, *result);
 		return true;
@@ -204,7 +204,7 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 			key_index = NPVARIANT_TO_DOUBLE(args[0]);
 
 		char *text = npstring_to_char(NPVARIANT_TO_STRING(args[1]));
-		char *data = private_decrypt(keys_get(instanceData->keys, key_index), text, strlen(text));
+		char *data = private_decrypt(NP_Array_get(instanceData->rsakey_array, key_index), text, strlen(text));
 		free(text);
 		STRINGZ_TO_NPVARIANT(data, *result);
 		return true;

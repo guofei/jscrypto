@@ -70,7 +70,7 @@ extern NPNetscapeFuncs* sBrowserFuncs;
 
 typedef struct InstanceData {
 	NPP npp;
-	Keys keys;
+  NP_Array rsakey_array;
   NP_Array counter_array;
 	NPObject *pluginobject;
 } InstanceData;
