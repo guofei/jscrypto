@@ -3,13 +3,7 @@
 
 #include <openssl/rsa.h>
 
-typedef struct Keys *Keys;
 typedef enum { PRIVATE_KEY , PUBLIC_KEY } KeyType;
-
-extern Keys keys_new();
-extern int keys_push(Keys k, RSA *rsa);
-extern RSA *keys_get(Keys k, int index);
-extern void keys_free(Keys k);
 
 extern int generate_rsa_key_to_file(const char *path, int size, const char *password);
 extern RSA* read_rsa_key_from_file(const char *file, KeyType type, const char *password);

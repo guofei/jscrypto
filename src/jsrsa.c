@@ -33,41 +33,6 @@ void DebugMsg(char *msg, int count)
 	}
 }
 
-struct Keys{
-	RSA **elem;
-	int length;
-};
-
-Keys keys_new()
-{
-	Keys k;
-	k = (Keys)malloc(sizeof(struct Keys));
-	k->elem = NULL;
-	k->length = 0;
-	return k;
-}
-
-int keys_push(Keys k, RSA *rsa)
-{
-	int len = sizeof(RSA *) * (k->length + 1);
-	k->elem = realloc(k->elem, len);
-	k->elem[k->length] = rsa;
-	return k->length++;
-}
-
-RSA *keys_get(Keys k, int index)
-{
-	return k->elem[index];
-}
-
-void keys_free(Keys k)
-{
-	for (int i = 0; i < k->length; ++i){
-		free_rsa_key(k->elem[i]);
-	}
-	free(k);
-}
-
 RSA *read_rsa_key_from_file(const char *file, KeyType type, const char *password)
 {
         FILE *fp = fopen(file, "r");
@@ -294,9 +259,45 @@ static int write_private_key(const char *path, RSA *key, const char *password)
         return 0;
 }
 
-//
+// not used
 
 int test(int test){
         return 0;
 }
 
+typedef struct Keys *Keys;
+
+struct Keys{
+	RSA **elem;
+	int length;
+};
+
+Keys keys_new()
+{
+	Keys k;
+	k = (Keys)malloc(sizeof(struct Keys));
+	k->elem = NULL;
+	k->length = 0;
+	return k;
+}
+
+int keys_push(Keys k, RSA *rsa)
+{
+	int len = sizeof(RSA *) * (k->length + 1);
+	k->elem = realloc(k->elem, len);
+	k->elem[k->length] = rsa;
+	return k->length++;
+}
+
+RSA *keys_get(Keys k, int index)
+{
+	return k->elem[index];
+}
+
+void keys_free(Keys k)
+{
+	for (int i = 0; i < k->length; ++i){
+		free_rsa_key(k->elem[i]);
+	}
+	free(k);
+}
