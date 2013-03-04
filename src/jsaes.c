@@ -60,7 +60,7 @@ int counter_decrypt(char *passwd, char *pt, char **result, int len, unsigned cha
 	EVP_CIPHER_CTX *ctx = cipher_ctx_new(passwd);
 	char *text;
 	int text_len = base64_decode(pt, &text);
-	char *ct = malloc(text_len * sizeof(char));
+	char *ct = calloc((text_len + 1), sizeof(char));
 	counter_encrypt_or_decrypt(ctx, text, ct, text_len, counter);
 	*result = ct;
 	free(text);

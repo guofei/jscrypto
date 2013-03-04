@@ -134,7 +134,7 @@ bool invoke(NPObject *obj, NPIdentifier methodName,const NPVariant *args,uint32_
 			counter = NPVARIANT_TO_DOUBLE(args[2]);
 
 		char *ret;
-		counter_encrypt(password, text, &ret, strlen(text), NP_Array_get(instanceData->counter_array, counter));
+		counter_decrypt(password, text, &ret, strlen(text), NP_Array_get(instanceData->counter_array, counter));
 		free(text);
 		free(password);
 		STRINGZ_TO_NPVARIANT(ret, *result);
