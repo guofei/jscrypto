@@ -30,14 +30,15 @@ function plugin_call_test(){
   alert(ciphertext);
   var text = plugin.decrypt(pri, ciphertext);
   alert(text);
-  var counter = plugin.counter_create(1)
-  alert("counter: " + counter);
-  var text = plugin.counter_encrypt("password", "text", counter);
-  var counter2 = plugin.counter_create(1)
-  alert("counter: " + counter2);
-  var text2 = plugin.counter_decrypt("password", text, counter2);
-  alert(text2);
   //plugin.test("helloword");
+  var counter1 = plugin.counter_create(1);
+  var ciphertext1 = plugin.counter_encrypt("password", "text1", counter1);
+  var ciphertext2 = plugin.counter_encrypt("password", "text2", counter1);
+  var counter2 = plugin.counter_create(1);
+  var text1 = plugin.counter_decrypt("password", ciphertext1, counter2);
+  alert(text1);
+  var text2 = plugin.counter_decrypt("password", ciphertext2, counter2);
+  alert(text2);
 }
 
 </script>
